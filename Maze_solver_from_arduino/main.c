@@ -36,15 +36,27 @@ void prosto(int czas);
 void cofaj(int czas);
 void w_prawo(int czas);
 void w_lewo(int czas);
+void manewr_zawroc();
+void manewr_lewo();
+void manewr_prawo();
+void decyduj();
+int logika();
 void delay_ms(uint16_t count);
+
 
 
 int pomiary [] = {0,0,0,0,0}; // indeks 0 to maks lewy, indeks 4 to maks prawy |  podłaczenie PC4, PC3, PC5, PC1, PC0
 int pomiary_[] = {0,0,0,0,0}; // pomiary przeksztalcone do 0 1
 int zkalibrowane [] = {1023,1023,1023,1023,1023};
+uint8_t mode = 0;
 
-double dutyCycleA = 110;		//inicjalizuje w tym miejscu zeby miec pewnosc ze przerwania beda dzialac
-double dutyCycleB = 110;		//zmienna double bo z intem nie dziala
+// regulacja predkosci silnikow, moge ja zmieniac w trakcie dzialania programu
+double dutyCycleA = 150;		//inicjalizuje w tym miejscu zeby miec pewnosc ze przerwania beda dzialac
+double dutyCycleB = 150;		//zmienna double bo z intem nie dziala
+
+
+
+
 
 
 int main(void)
@@ -55,26 +67,142 @@ int main(void)
     USART_Init(MYUBRR);
 	kalibracja();
 	setupPWM();
-	
-    while (1) 
+	int i_ = 0;
+
+    while (1)
     {
-		prosto(200);
-		cofaj(200);
-		w_prawo(200);
-		w_lewo(200);
+	    switch(mode){
+		    case 0:
+
+		    pomiar();
+
+		    if ((pomiary_[1] == 0) && (pomiary_[0] == 0) && (pomiary_[2] == 1) && (pomiary_[3] == 0) && ( pomiary_[4] == 0 ))
+		    {
+			    prosto(30);
+			    i_ =0;
+		    }
+
+		    else if ((pomiary_[1] == 0) && (pomiary_[0] == 0) && (pomiary_[2] == 0) && (pomiary_[3] == 0) && ( pomiary_[4] == 0 ))
+		    {
+			    i_ += 1;
+			    if (i_ > 20)			//czasem randomowo srodek nie pokazuje dlatego zeby poradzic sobie z problem rozpoznawania slepej uliczki
+			    {
+				    cofaj(480);
+				    mode = 7;       //wymyslilem cos takiego co stwierdza ze jestes w slepiej uliczce jak to sie stanie duzo razy pod rzad
+				    i_ = 0;
+			    }
+			    prosto(30);
+		    }
+		    
+		    else if ((pomiary_[1] == 0) && (pomiary_[0] == 0) && (pomiary_[2] == 1) && (pomiary_[3] == 1) && ( pomiary_[4] == 0 ))
+		    {
+			    w_prawo(30);
+			    i_ =0;
+		    }
+
+		    else if ((pomiary_[1] == 0) && (pomiary_[0] == 0) && (pomiary_[2] == 0) && (pomiary_[3] == 1) && ( pomiary_[4] == 0 ))
+		    {
+			    w_prawo(30);
+			    i_ =0;
+		    }
+
+		    else if ((pomiary_[1] == 1) && (pomiary_[0] == 0) && (pomiary_[2] == 1) && (pomiary_[3] == 0) && ( pomiary_[4] == 0 ))
+		    {
+			    w_lewo(30);
+			    i_ =0;
+		    }
+		    
+		    else if ((pomiary_[1] == 1) && (pomiary_[0] == 0) && (pomiary_[2] == 0) && (pomiary_[3] == 0) && ( pomiary_[4] == 0 ))
+		    {
+			    w_lewo(30);
+			    i_ =0;
+		    }
+
+		    else
+		    {
+			    _delay_ms(300);
+			    decyduj();
+			    _delay_ms(300);
+			    i_ =0;
+		    }
+
+		    break;
+		    
+		    case 1:
+		    manewr_lewo();
+		    mode = 0;
+		    _delay_ms(300);
+		    break;
+
+		    case 2:
+		    manewr_lewo();
+		    mode = 0;
+		    _delay_ms(300);
+		    break;
+
+		    case 3:
+		    manewr_prawo();
+		    mode = 0;
+		    _delay_ms(300);
+		    break;
+
+		    case 4:
+		    manewr_lewo();
+		    mode = 0;
+		    _delay_ms(300);
+		    break;
+
+		    case 5:
+		    //jedz dalej
+		    mode = 0;
+		    break;
+
+		    case 6:
+		    manewr_lewo();
+		    mode = 0;
+		    _delay_ms(300);
+		    break;
+
+		    case 7:
+		    manewr_zawroc();
+		    mode = 0;
+		    _delay_ms(300);
+		    break;
+
+		    case 8:
+		    mode = 0;
+		    while(1)
+		    {
+			    PORTB |= (1 << PORTB4);
+			    _delay_ms(200);
+			    PORTB &= ~(1 << PORTB4);
+			    _delay_ms(200);
+		    }
+		    break;
+		    
+		    default:
+		    break;
+		    
+	    }
 		
-	
-		/*
+/*
 		pomiar();
 		USART_Transmit(pomiary_[0]);
 		USART_Transmit(pomiary_[1]);
 		USART_Transmit(pomiary_[2]);
 		USART_Transmit(pomiary_[3]);
 		USART_Transmit(pomiary_[4]);
-	
-		USART_Transmit(99);
-		_delay_ms(1500);
-		*/
+
+		USART_Transmit(222);
+		
+		USART_Transmit(pomiary[0]/10);
+		USART_Transmit(pomiary[1]/10);
+		USART_Transmit(pomiary[2]/10);
+		USART_Transmit(pomiary[3]/10);
+		USART_Transmit(pomiary[4]/10);
+
+		_delay_ms(3333);
+*/
     }
 }
 
@@ -84,10 +212,17 @@ int main(void)
 
 
 
-
-
-
-// ponizsza funkcja dokonuje pomiaru i uzywa przetwornika na 5 kanalach
+// ponizsze funkcje dokonuja pomiaru i uzywa przetwornika na 5 kanalach
+void setupADC()
+{
+	ADCSRA |= (1 << ADPS2);
+	ADMUX |= (1 << REFS0); 
+	ADCSRA |= (1 << ADIE);
+	ADCSRA |= (1 << ADEN);
+	sei();
+	ADCSRA |= (1 << ADSC);
+	
+}
 ISR(ADC_vect)
 {
 	uint8_t theLOW = ADCL;
@@ -130,16 +265,7 @@ ISR(ADC_vect)
 		ADCSRA |= (0 << ADSC);
 	}
 }
-void setupADC()
-{
-	ADCSRA |= (1 << ADPS2);
-	ADMUX |= (1 << REFS0); 
-	ADCSRA |= (1 << ADIE);
-	ADCSRA |= (1 << ADEN);
-	sei();
-	ADCSRA |= (1 << ADSC);
-	
-}
+
 
 // potrzebene do PWM, troche prob i bledow troche filmiki troche datasheet
 void setupPWM()
@@ -161,6 +287,8 @@ ISR(TIMER1_OVF_vect)
 	OCR1B = (dutyCycleB/255)*65535;
 }
 
+
+
 void pomiar()
 {
 	setupADC();
@@ -176,7 +304,6 @@ void pomiar()
 		}
 	}
 }
-
 
 
 
@@ -224,10 +351,9 @@ void kalibracja()
 
 	DDRB |= (1 << DDB4);
 	PORTB |= (1 << PORTB4); // zapala diode sygnalizujac ze kalibracja sie udala i ruszy za 2 sek
-	_delay_ms(2000);  
+	_delay_ms(5000);  
 }
 
-//-------------------------------------------------------------------
 
 void prosto(int czas)
 {
@@ -242,9 +368,6 @@ void prosto(int czas)
 }
 
 
-
-//-------------------------------------------------------------------
-
 void cofaj(int czas)
 {
 
@@ -257,9 +380,6 @@ void cofaj(int czas)
 	PORTD &= ~(1 << In4);
 }
 
-
-
-//-------------------------------------------------------------------
 
 void w_prawo (int czas)
 {
@@ -275,8 +395,6 @@ void w_prawo (int czas)
 }
 
 
-//-------------------------------------------------------------------
-
 void w_lewo (int czas)
 {
 	
@@ -289,6 +407,179 @@ void w_lewo (int czas)
 	PORTD &= ~(1 << In4);
 }
 
+//90 stopni lewo
+void manewr_lewo(){
+	
+	w_lewo(300);
+	delay_ms(100);
+	prosto(150);
+	w_lewo(200);
+		
+	do
+	{
+		pomiar();
+		w_lewo(40);
+	}while(logika());	// kreci sie dopoki nie usyska tego co chcemy
+}
+
+// 90 stopni w prawo
+void manewr_prawo(){
+	
+	w_prawo(300);
+	_delay_ms(100);
+	prosto(150);
+	w_prawo(200);
+	do
+	{
+		pomiar();
+		w_prawo(40);
+	}while(logika());      // kreci sie dopoki nie usyska tego co chcemy
+}
+
+// wyrzuca 0 jesli znajdzie linie do sledzenia podczas manewru, wyrzuca 1 jesli nie widzi
+int logika()
+{
+	if((pomiary_[3] == 0) && (pomiary_[1] == 1) && (pomiary_[0] == 0) && (pomiary_[4] == 0) && (pomiary_[2] == 0 || pomiary_[2] == 1))
+	{
+		return 0;
+	}
+
+	else if ((pomiary_[3] == 1) && (pomiary_[1] == 0) && (pomiary_[0] == 0) && (pomiary_[4] == 0) && (pomiary_[2] == 0 || pomiary_[2] == 1))
+	{
+		return 0;
+	}
+
+	else if ((pomiary_[3] == 0) && (pomiary_[1] == 0) && (pomiary_[0] == 0) && (pomiary_[4] == 0) && (pomiary_[2] == 1))
+	{
+		return 0;
+	}
+
+	else
+	{
+		return 1;
+	}
+}   
+
+//zawracanie
+void manewr_zawroc(){
+	
+	w_prawo(400);
+	int j = 0;
+	do
+	{
+		j +=1;
+		if (j>60)
+		{
+			cofaj(250);
+			j =0;
+		}
+		pomiar();
+		w_prawo(40);
+	}while(logika());
+
+}
+
+
+
+/*-------------------------------------decyduj-------------------------------------------
+ * po zauważeniu przez robota zdarzerzenia innego niz linia, przejezdza odpowiednia droge 
+ * i do zmiennej mode wpisuje w zaleznosci od napotkaniej przeszkody
+ * [ 0 = zwykla linia ]
+ * 1 = skrzyzowanie (linie prawo lewo i posrodku
+ * 2 = T (linie prawo lewo)
+ * 3 = tylko prawo
+ * 4 = tylko lewo
+ * 5 = prosto/prawo
+ * 6 = prosto lewo
+ * 7 = slepa uliczka
+ * 8 = koniec trasy
+ * 
+ */
+void decyduj()
+{
+	int pomiary_decyduj[11][5];
+    //pomiar na ktorym sie zatrzymal - przed cofnieciem
+    pomiar();
+    pomiary_decyduj[10][0] = pomiary_[0];
+    pomiary_decyduj[10][1] = pomiary_[1];
+    pomiary_decyduj[10][2] = pomiary_[2];
+    pomiary_decyduj[10][3] = pomiary_[3];
+    pomiary_decyduj[10][4] = pomiary_[4];
+
+	cofaj(190);
+
+	for (int i =0; i<10;i++)
+	{
+		pomiar();
+		pomiary_decyduj[i][0] = pomiary_[0];
+		pomiary_decyduj[i][1] = pomiary_[1];
+		pomiary_decyduj[i][2] = pomiary_[2];
+		pomiary_decyduj[i][3] = pomiary_[3];
+		pomiary_decyduj[i][4] = pomiary_[4];
+		prosto(40);   
+	}
+     
+	int suma[5];
+		suma[0] = 0;
+		suma[2] = 0;
+		suma[4] = 0;
+
+	for (int i = 0; i<11; i++)
+	{
+		suma[0] = suma[0] + pomiary_decyduj[i][0];
+		suma[4] = suma[4] + pomiary_decyduj[i][4];
+	}
+
+	for (int i = 5; i<10; i++)
+	{
+		suma[2] = suma[2] + pomiary_decyduj[i][2];
+	}
+
+
+	if ((suma[0] >0 ) && (suma[4] >0 ) &&(suma[2] >= 2) )
+	{
+		if((suma[0] >= 6) &&(suma[4] >= 6) && (suma[2] >= 3) )
+		{
+			mode = 8; //koniec trasy 
+		}
+		else
+		{
+			mode =1; //skrzyzowanie
+		}
+	}
+
+	else if((suma[0] > 0) &&(suma[4] > 0) && (suma[2] <= 1) )
+	{
+		mode = 2;  // T
+	}
+
+	else if((suma[0] == 0) &&(suma[4] > 0) && (suma[2] <= 1) )
+	{
+		mode = 3;   // tylko prawo
+	}
+
+	else if((suma[0] > 0) &&(suma[4] == 0) && (suma[2] <= 1) )
+	{
+		mode = 4;   //tylko lewo
+	}
+
+	else if((suma[0] == 0) &&(suma[4] > 0) && (suma[2] >= 2) )
+	{
+		mode = 5;     // prosto - prawo
+	}
+
+	else if((suma[0] > 0) &&(suma[4] == 0) && (suma[2] >= 2) )
+	{
+		mode = 6;     // prosto - lewo
+	}
+
+// z tym narazie jest taki problem ze wszystkie zera narazie sa normalna sytuacja w ktorej autko jedzie do przodu bo za czesto w srodku wywala :/
+//else if((suma[0] == 0) &&(suma[4] == 0) && (suma[2] == 0) ){
+//  mode = 7;     // slepa uliczka
+//}
+
+}
+
 
 //ze wzgledu na to ze funkcja _delay_ms nie pozwala na uzywanie zmiennej 
 void delay_ms(uint16_t count) 
@@ -299,7 +590,7 @@ void delay_ms(uint16_t count)
 	}
 }
 
-
+//wziete z internetu funkcje pozwalajace na przesylanie 8bitowych charow przez seriala
 void USART_Init( unsigned int ubrr)
 {
 	/*Set baud rate */
@@ -316,7 +607,6 @@ void USART_Init( unsigned int ubrr)
 	/* Set frame format: 8data */
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
-
 void USART_Transmit( unsigned char data )
 {
 	/* Wait for empty transmit buffer */
