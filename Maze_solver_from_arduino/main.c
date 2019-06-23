@@ -51,8 +51,8 @@ int zkalibrowane [] = {1023,1023,1023,1023,1023};
 uint8_t mode = 0;
 
 // regulacja predkosci silnikow, moge ja zmieniac w trakcie dzialania programu
-double dutyCycleA = 150;		//inicjalizuje w tym miejscu zeby miec pewnosc ze przerwania beda dzialac
-double dutyCycleB = 150;		//zmienna double bo z intem nie dziala
+double dutyCycleA = 155;		//inicjalizuje w tym miejscu zeby miec pewnosc ze przerwania beda dzialac
+double dutyCycleB = 148;		//zmienna double bo z intem nie dziala
 
 
 
@@ -87,7 +87,7 @@ int main(void)
 			    i_ += 1;
 			    if (i_ > 20)			//czasem randomowo srodek nie pokazuje dlatego zeby poradzic sobie z problem rozpoznawania slepej uliczki
 			    {
-				    cofaj(480);
+				    cofaj(450);
 				    mode = 7;       //wymyslilem cos takiego co stwierdza ze jestes w slepiej uliczce jak to sie stanie duzo razy pod rzad
 				    i_ = 0;
 			    }
@@ -192,7 +192,6 @@ int main(void)
 		USART_Transmit(pomiary_[2]);
 		USART_Transmit(pomiary_[3]);
 		USART_Transmit(pomiary_[4]);
-
 		USART_Transmit(222);
 		
 		USART_Transmit(pomiary[0]/10);
@@ -200,7 +199,6 @@ int main(void)
 		USART_Transmit(pomiary[2]/10);
 		USART_Transmit(pomiary[3]/10);
 		USART_Transmit(pomiary[4]/10);
-
 		_delay_ms(3333);
 */
     }
@@ -474,7 +472,7 @@ void manewr_zawroc(){
 			j =0;
 		}
 		pomiar();
-		w_prawo(40);
+		w_prawo(45);
 	}while(logika());
 
 }
@@ -615,4 +613,3 @@ void USART_Transmit( unsigned char data )
 	/* Put data into buffer, sends the data */
 	UDR0 = data;
 }
-

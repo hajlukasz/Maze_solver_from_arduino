@@ -1492,8 +1492,8 @@ void manewr_zawroc(){
 		}
 		pomiar();
  892:	0e 94 76 01 	call	0x2ec	; 0x2ec <pomiar>
-		w_prawo(40);
- 896:	88 e2       	ldi	r24, 0x28	; 40
+		w_prawo(45);
+ 896:	8d e2       	ldi	r24, 0x2D	; 45
  898:	90 e0       	ldi	r25, 0x00	; 0
  89a:	0e 94 0f 04 	call	0x81e	; 0x81e <w_prawo>
 	}while(logika());
@@ -1625,7 +1625,7 @@ int main(void)
 			    i_ += 1;
 			    if (i_ > 20)			//czasem randomowo srodek nie pokazuje dlatego zeby poradzic sobie z problem rozpoznawania slepej uliczki
 			    {
-				    cofaj(480);
+				    cofaj(450);
 				    mode = 7;       //wymyslilem cos takiego co stwierdza ze jestes w slepiej uliczce jak to sie stanie duzo razy pod rzad
  92a:	0f 2e       	mov	r0, r31
  92c:	f7 e0       	ldi	r31, 0x07	; 7
@@ -1706,8 +1706,8 @@ int main(void)
  9a2:	11 05       	cpc	r17, r1
  9a4:	44 f0       	brlt	.+16     	; 0x9b6 <main+0xb0>
 			    {
-				    cofaj(480);
- 9a6:	80 ee       	ldi	r24, 0xE0	; 224
+				    cofaj(450);
+ 9a6:	82 ec       	ldi	r24, 0xC2	; 194
  9a8:	91 e0       	ldi	r25, 0x01	; 1
  9aa:	0e 94 21 03 	call	0x642	; 0x642 <cofaj>
 				    mode = 7;       //wymyslilem cos takiego co stwierdza ze jestes w slepiej uliczce jak to sie stanie duzo razy pod rzad
